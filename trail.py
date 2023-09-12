@@ -2,6 +2,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from mountain import Mountain
+from personality import PersonalityDecision
 
 from typing import TYPE_CHECKING, Union
 
@@ -96,7 +97,24 @@ class Trail:
 
     def follow_path(self, personality: WalkerPersonality) -> None:
         """Follow a path and add mountains according to a personality."""
-        raise NotImplementedError()
+        current_trail = self
+        while current_trail.store != None:
+            if current_trail.store == TrailSeries:
+                personality.add_mountain(current_trail.store.mountain)
+                current_trail = current_trail.store.following
+            else:
+                if personality.select_branch() == PersonalityDecision.TOP:
+                    if current_trail.store.top.store == TrailSeries:
+                        current_trail = current_trail.store.top
+                        personality.add_mountain(current_trail.store.mountain)
+
+                elif personality.select_branch() == PersonalityDecision.BOTTOM:
+                    if current_trail.store.bottom.store == TrailSeries:
+                        current_trail = current_trail.store.bottom
+                        personality.add_mountain(current_trail.store.mountain)
+                        
+                elif personality.select_branch() == PersonalityDecision.STOP:
+                    break
 
     def collect_all_mountains(self) -> list[Mountain]:
         """Returns a list of all mountains on the trail."""
