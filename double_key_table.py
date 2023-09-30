@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Generic, TypeVar, Iterator
 from data_structures.hash_table import LinearProbeTable, FullError
 from data_structures.referential_array import ArrayR
+from data_structures.linked_stack import LinkedStack
 
 K1 = TypeVar('K1')
 K2 = TypeVar('K2')
@@ -28,7 +29,13 @@ class DoubleKeyTable(Generic[K1, K2, V]):
     HASH_BASE = 31
 
     def __init__(self, sizes:list|None=None, internal_sizes:list|None=None) -> None:
-        raise NotImplementedError()
+        if sizes is not None:
+            self.TABLE_SIZES = sizes
+        self.top_level_hash_table = LinearProbeTable(self.TABLE_SIZES)
+        
+        if internal_sizes is not None:
+            self.TABLE_SIZES = internal_sizes
+        self.TABLE_SIZES = DoubleKeyTable.TABLE_SIZES
 
     def hash1(self, key: K1) -> int:
         """
@@ -65,7 +72,56 @@ class DoubleKeyTable(Generic[K1, K2, V]):
         :raises KeyError: When the key pair is not in the table, but is_insert is False.
         :raises FullError: When a table is full and cannot be inserted.
         """
-        raise NotImplementedError()
+        position1 = self.hash1(key1)
+
+        probe1 = False
+        probe2 = False
+
+        for _ in range(self.top_level_hash_table.table_size):
+            if self.top_level_hash_table.array[position1] is None:
+                # Empty spot. Am I upserting or retrieving?
+                if is_insert is True and self.top_level_hash_table.__contains__(key1) is False:
+                    internal_table = LinearProbeTable(self.TABLE_SIZES)
+                    self.top_level_hash_table.array[position1] = (key1, internal_table)
+                    probe1 = True
+                    break
+                else:
+                    raise KeyError(key1)
+            elif self.top_level_hash_table.array[position1][0] == key1:
+                probe1 = True
+                break
+            else:
+                # Taken by something else. Time to linear probe.
+                position1 = (position1 + 1) % self.top_level_hash_table.table_size
+
+        if is_insert is True and probe1 is False:
+            raise FullError("Table is full!")
+        elif probe1 is False:
+            raise KeyError(key1)
+        
+        position2 = self.hash2(key2, internal_table)
+
+        for _ in range(internal_table.table_size):
+            if internal_table.array[position2] is None:
+                # Empty spot. Am I upserting or retrieving?
+                if is_insert:
+                    probe2 = True
+                    break
+                else:
+                    raise KeyError(key2)
+            elif internal_table.array[position2][0] == key2:
+                probe2 = True
+                break
+            else:
+                # Taken by something else. Time to linear probe.
+                position2 = (position2 + 1) % internal_table.table_size
+
+        if is_insert is True and probe2 is False:
+            raise FullError("Table is full!")
+        elif probe2 is False:
+            raise KeyError(key2)
+        
+        return (position1, position2)
 
     def iter_keys(self, key:K1|None=None) -> Iterator[K1|K2]:
         """
@@ -81,7 +137,10 @@ class DoubleKeyTable(Generic[K1, K2, V]):
         key = None: returns all top-level keys in the table.
         key = x: returns all bottom-level keys for top-level key x.
         """
-        raise NotImplementedError()
+        if key is None:
+            for _ in range(len(self.top_level_hash_table)):
+                if self.top_level_hash_table[position1] is None:
+                    pass
 
     def iter_values(self, key:K1|None=None) -> Iterator[V]:
         """
@@ -145,11 +204,12 @@ class DoubleKeyTable(Generic[K1, K2, V]):
         """
         raise NotImplementedError()
 
+    @property
     def table_size(self) -> int:
         """
         Return the current size of the table (different from the length)
         """
-        raise NotImplementedError()
+        return self.top_level_hash_table.table_size
 
     def __len__(self) -> int:
         """
