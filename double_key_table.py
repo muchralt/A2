@@ -142,13 +142,13 @@ class DoubleKeyTable(Generic[K1, K2, V]):
 
         if key is None:
             for i in range(self.top_level_hash_table.table_size):
-                if self.top_level_hash_table[i] is not None:
-                    top_level_keys.append(self.top_level_hash_table[i][0])
+                if self.top_level_hash_table.array[i] is not None:
+                    top_level_keys.append(self.top_level_hash_table.array[i][0])
             return top_level_keys
         else:
             for x in range(self.internal_table.table_size):
-                if self.internal_table[key][x] is not None:
-                    internal_keys.append(self.internal_table[key][x])
+                if self.internal_table.array[key][x] is not None:
+                    internal_keys.append(self.internal_table.array[key][x])
             return internal_keys
 
     def iter_values(self, key:K1|None=None) -> Iterator[V]:
@@ -165,8 +165,23 @@ class DoubleKeyTable(Generic[K1, K2, V]):
         key = None: returns all values in the table.
         key = x: returns all values for top-level key x.
         """
-        raise NotImplementedError()
+        all_values = []
+        internal_values = []
 
+        if key is None:
+            for i in range(self.top_level_hash_table.table_size):
+                if self.top_level_hash_table.array[i] is not None:
+                    # all_values.append(self.top_level_hash_table.array[i][1])
+                    for x in range(self.internal_table.table_size):
+                        if self.internal_table.array[i][x] is not None:
+                            all_values.append(self.internal_table.array[i][x])
+            return all_values
+        else:
+            for x in range(self.internal_table.table_size):
+                if self.internal_table.array[key][x] is not None:
+                    internal_values.append(self.internal_table.array[key][x])
+            return internal_values
+        
     def __contains__(self, key: tuple[K1, K2]) -> bool:
         """
         Checks to see if the given key is in the Hash Table
