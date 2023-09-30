@@ -81,8 +81,8 @@ class DoubleKeyTable(Generic[K1, K2, V]):
             if self.top_level_hash_table.array[position1] is None:
                 # Empty spot. Am I upserting or retrieving?
                 if is_insert is True and self.top_level_hash_table.__contains__(key1) is False:
-                    self.internal_table = LinearProbeTable(self.TABLE_SIZES)
-                    self.top_level_hash_table.array[position1] = (key1, self.internal_table)
+                    internal_table = LinearProbeTable(self.TABLE_SIZES)
+                    self.top_level_hash_table.array[position1] = (key1, internal_table)
                     probe1 = True
                     break
                 else:
@@ -99,22 +99,22 @@ class DoubleKeyTable(Generic[K1, K2, V]):
         elif probe1 is False:
             raise KeyError(key1)
         
-        position2 = self.hash2(key2, self.internal_table)
+        position2 = self.hash2(key2, internal_table)
 
-        for _ in range(self.internal_table.table_size):
-            if self.internal_table.array[position2] is None:
+        for _ in range(internal_table.table_size):
+            if internal_table.array[position2] is None:
                 # Empty spot. Am I upserting or retrieving?
                 if is_insert:
                     probe2 = True
                     break
                 else:
                     raise KeyError(key2)
-            elif self.internal_table.array[position2][0] == key2:
+            elif internal_table.array[position2][0] == key2:
                 probe2 = True
                 break
             else:
                 # Taken by something else. Time to linear probe.
-                position2 = (position2 + 1) % self.internal_table.table_size
+                position2 = (position2 + 1) % internal_table.table_size
 
         if is_insert is True and probe2 is False:
             raise FullError("Table is full!")
@@ -133,7 +133,7 @@ class DoubleKeyTable(Generic[K1, K2, V]):
         if key is None:
             DoubleKeyTable.keys(self, key)
         else:
-            
+            pass
 
     def keys(self, key:K1|None=None) -> list[K1|K2]:
         """
@@ -142,16 +142,18 @@ class DoubleKeyTable(Generic[K1, K2, V]):
         """
         top_level_keys = []
         internal_keys = []
-
         if key is None:
             for i in range(self.top_level_hash_table.table_size):
                 if self.top_level_hash_table.array[i] is not None:
                     top_level_keys.append(self.top_level_hash_table.array[i][0])
             return top_level_keys
+            
         else:
-            for x in range(self.internal_table.table_size):
-                if self.internal_table.array[key][x] is not None:
-                    internal_keys.append(self.internal_table.array[key][x])
+            position = self.hash1(key)
+            internal_table = self.top_level_hash_table.array[position][1]
+            for i in range(internal_table.table_size):
+                if internal_table.array[i][0] is not None:
+                    internal_keys.append(internal_table.array[i][0])
             return internal_keys
 
     def iter_values(self, key:K1|None=None) -> Iterator[V]:
@@ -180,6 +182,8 @@ class DoubleKeyTable(Generic[K1, K2, V]):
                             all_values.append(self.internal_table.array[i][x])
             return all_values
         else:
+            position = self.hash1(key)
+            internal_table =
             for x in range(self.internal_table.table_size):
                 if self.internal_table.array[key][x] is not None:
                     internal_values.append(self.internal_table.array[key][x])
