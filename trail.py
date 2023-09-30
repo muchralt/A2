@@ -1,8 +1,8 @@
 from __future__ import annotations
 from dataclasses import dataclass
+from data_structures.linked_stack import LinkedStack
 
 from mountain import Mountain
-from personality import PersonalityDecision
 
 from typing import TYPE_CHECKING, Union
 
@@ -97,24 +97,50 @@ class Trail:
 
     def follow_path(self, personality: WalkerPersonality) -> None:
         """Follow a path and add mountains according to a personality."""
-        current_trail = self
-        while current_trail.store != None:
-            if current_trail.store == TrailSeries:
-                personality.add_mountain(current_trail.store.mountain)
-                current_trail = current_trail.store.following
-            else:
-                if personality.select_branch() == PersonalityDecision.TOP:
-                    if current_trail.store.top.store == TrailSeries:
-                        current_trail = current_trail.store.top
-                        personality.add_mountain(current_trail.store.mountain)
+        from personality import PersonalityDecision
 
-                elif personality.select_branch() == PersonalityDecision.BOTTOM:
-                    if current_trail.store.bottom.store == TrailSeries:
-                        current_trail = current_trail.store.bottom
-                        personality.add_mountain(current_trail.store.mountain)
+        stack_trailsplit = LinkedStack()
+        current_path = self.store
+        while current_path is not None:
+            if isinstance(current_path, TrailSeries):
+                personality.add_mountain(current_path.mountain)
+                current_path = current_path.following.store
+            elif isinstance(current_path, TrailSplit):
+                stack_trailsplit.push(current_path)
+                choice = personality.select_branch(current_path.top, current_path.bottom)
+                if choice == PersonalityDecision.STOP:
+                    return
+                elif choice == PersonalityDecision.BOTTOM:
+                    current_path = current_path.bottom.store
+                elif choice == PersonalityDecision.TOP:
+                    current_path = current_path.top.store
+            
+            while current_path is None and len(stack_trailsplit) > 0:
+                current_path = stack_trailsplit.pop().following.store
+
+        # current_trail = self
+        # while current_trail.store != None:
+        #     if type(current_trail.store) == TrailSeries:
+        #         personality.add_mountain(current_trail.store.mountain)
+        #         current_trail = current_trail.store.following
+
+        #     elif type(current_trail.store) == TrailSplit:
+        #         if personality.select_branch(current_trail.store.top, current_trail.store.bottom) == PersonalityDecision.TOP:
+        #             if current_trail.store.top.store == TrailSeries:
+        #                 personality.add_mountain(current_trail.store.top.store.mountain)
+        #                 current_trail = current_trail.store.top.store.following
+        #             else:
+        #                 current_trail = current_trail.store.following
+
+        #         elif personality.select_branch(current_trail.store.top, current_trail.store.bottom) == PersonalityDecision.BOTTOM:
+        #             if current_trail.store.bottom.store == TrailSeries:
+        #                 personality.add_mountain(current_trail.store.bottom.store.mountain)
+        #                 current_trail = current_trail.store.bottom.store.following
+        #             else:
+        #                 current_trail = current_trail.store.following
                         
-                elif personality.select_branch() == PersonalityDecision.STOP:
-                    break
+        #         elif personality.select_branch(current_trail.store.top, current_trail.store.bottom) == PersonalityDecision.STOP:
+        #             break
 
     def collect_all_mountains(self) -> list[Mountain]:
         """Returns a list of all mountains on the trail."""
