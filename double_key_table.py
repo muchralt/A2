@@ -130,7 +130,10 @@ class DoubleKeyTable(Generic[K1, K2, V]):
         key = k:
             Returns an iterator of all keys in the bottom-hash-table for k.
         """
-        raise NotImplementedError()
+        if key is None:
+            DoubleKeyTable.keys(self, key)
+        else:
+            
 
     def keys(self, key:K1|None=None) -> list[K1|K2]:
         """
@@ -239,7 +242,7 @@ class DoubleKeyTable(Generic[K1, K2, V]):
         """
         Returns number of elements in the hash table
         """
-        raise NotImplementedError()
+        return self.top_level_hash_table.__len__()
 
     def __str__(self) -> str:
         """
