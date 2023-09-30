@@ -176,10 +176,7 @@ class DoubleKeyTable(Generic[K1, K2, V]):
         if key is None:
             for i in range(self.top_level_hash_table.table_size):
                 if self.top_level_hash_table.array[i] is not None:
-                    # all_values.append(self.top_level_hash_table.array[i][1])
-                    for x in range(self.internal_table.table_size):
-                        if self.internal_table.array[i][x] is not None:
-                            all_values.append(self.internal_table.array[i][x])
+                    all_values.append(self.top_level_hash_table.array[i][1])
             return all_values
         else:
             position = self.hash1(key)
