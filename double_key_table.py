@@ -79,7 +79,8 @@ class DoubleKeyTable(Generic[K1, K2, V]):
         if is_insert:
             internal_table = LinearProbeTable(self.TABLE_SIZES)
             internal_table.hash = lambda k: self.hash2(k, internal_table)
-            self.top_level_hash_table.__setitem__(key1, internal_table)
+            self.top_level_hash_table.array[position1] = (key1, internal_table)
+        internal_table = self.top_level_hash_table.array[position1][1]
 
         position2 = internal_table._linear_probe(key2, is_insert)
         return (position1, position2)
@@ -176,8 +177,8 @@ class DoubleKeyTable(Generic[K1, K2, V]):
         :raises KeyError: when the key doesn't exist.
         """
         position = self._linear_probe(key[0], key[1], False)
-        internal_table = self.top_level_hash_table.array[position[0]]
-        return internal_table.array[position[1]]
+        internal_table = self.top_level_hash_table.array[position[0]][1]
+        return internal_table.array[position[1]][1]
 
     def __setitem__(self, key: tuple[K1, K2], data: V) -> None:
         """
@@ -189,12 +190,12 @@ class DoubleKeyTable(Generic[K1, K2, V]):
         if self.top_level_hash_table.array[position[0]] is None:
             self.top_level_hash_table.count += 1
 
-        internal_table = self.top_level_hash_table.array[position[0]]
+        internal_table = self.top_level_hash_table.array[position[0]][1]
 
         if len(self.top_level_hash_table) > self.top_level_hash_table.table_size / 2:
             self.top_level_hash_table._rehash()
 
-        internal_table.array[position[1], data]
+        internal_table.array[position[1]] = (key[1], data)
 
         if len(internal_table) > internal_table.table_size / 2:
             internal_table._rehash()
