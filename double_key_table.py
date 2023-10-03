@@ -33,7 +33,8 @@ class DoubleKeyTable(Generic[K1, K2, V]):
             self.top_level_hash_table = LinearProbeTable(self.TABLE_SIZES)
         else:
             self.top_level_hash_table = LinearProbeTable(sizes)
-            
+
+        self.top_level_hash_table.hash = lambda k: self.hash1(k)
         
         if internal_sizes is not None:
             self.TABLE_SIZES = internal_sizes
