@@ -19,5 +19,12 @@ print(table2._linear_probe("Jim", True))
 
 print(table3["May", "Jim"])
 
-print(ord("y") % 5)
 
+value = 0
+a = 31415
+key = "Jim"
+for char in key:
+    value = (ord(char) + a * value) % table2.table_size
+    a = a * 31 % (table2.table_size - 1)
+
+print(value)
