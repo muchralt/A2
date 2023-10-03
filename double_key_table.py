@@ -176,15 +176,28 @@ class DoubleKeyTable(Generic[K1, K2, V]):
         :raises KeyError: when the key doesn't exist.
         """
         position = self._linear_probe(key[0], key[1], False)
-        internal_table = self.top_level_hash_table.__getitem__(key[0])
-        return internal_table.__getitem__(key[1])
+        internal_table = self.top_level_hash_table.array[position[0]]
+        return internal_table.array[position[1]]
 
     def __setitem__(self, key: tuple[K1, K2], data: V) -> None:
         """
         Set an (key, value) pair in our hash table.
         """
 
-        raise NotImplementedError()
+        position = self._linear_probe(key[0], key[1], True)
+
+        if self.top_level_hash_table.array[position[0]] is None:
+            self.top_level_hash_table.count += 1
+
+        internal_table = self.top_level_hash_table.array[position[0]]
+
+        if len(self.top_level_hash_table) > self.top_level_hash_table.table_size / 2:
+            self.top_level_hash_table._rehash()
+
+        internal_table.array[position[1], data]
+
+        if len(internal_table) > internal_table.table_size / 2:
+            internal_table._rehash()
 
     def __delitem__(self, key: tuple[K1, K2]) -> None:
         """
