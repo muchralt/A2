@@ -1,16 +1,23 @@
 from data_structures.hash_table import LinearProbeTable
 from double_key_table import DoubleKeyTable
 
-table1 = LinearProbeTable([4])
-table2 = LinearProbeTable([4])
+table1 = LinearProbeTable([12])
+table2 = LinearProbeTable([5])
 
-table1.__setitem__("string", table2)
+table1.__setitem__("May", table2)
 
-table2.__setitem__("string", "uchka")
+table2.__setitem__("Jim", "string")
 
-table3 = DoubleKeyTable([8], [4])
+table3 = DoubleKeyTable(sizes=[12], internal_sizes=[5])
 
-er = []
+table3.top_level_hash_table = table1
 
-check = "__iter__" in dir(er)
-print(check)
+
+print(table3._linear_probe("May", "Jim", False))
+
+print(table2._linear_probe("Jim", True))
+
+print(table3["May", "Jim"])
+
+print(ord("y") % 5)
+

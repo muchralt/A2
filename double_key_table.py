@@ -76,7 +76,7 @@ class DoubleKeyTable(Generic[K1, K2, V]):
         :raises FullError: When a table is full and cannot be inserted.
         """
         position1 = self.top_level_hash_table._linear_probe(key1, is_insert)
-        if is_insert:
+        if is_insert is True:
             internal_table = LinearProbeTable(self.TABLE_SIZES)
             internal_table.hash = lambda k: self.hash2(k, internal_table)
             self.top_level_hash_table.array[position1] = (key1, internal_table)
