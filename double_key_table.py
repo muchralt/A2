@@ -79,7 +79,7 @@ class DoubleKeyTable(Generic[K1, K2, V]):
         if is_insert:
             internal_table = LinearProbeTable(self.TABLE_SIZES)
             internal_table.hash = lambda k: self.hash2(k, internal_table)
-            self.top_level_hash_table.array[position1] = (key1, internal_table)
+            self.top_level_hash_table.__setitem__(key1, internal_table)
 
         position2 = internal_table._linear_probe(key2, is_insert)
         return (position1, position2)
@@ -175,7 +175,9 @@ class DoubleKeyTable(Generic[K1, K2, V]):
 
         :raises KeyError: when the key doesn't exist.
         """
-        raise NotImplementedError()
+        position = self._linear_probe(key[0], key[1], False)
+        internal_table = self.top_level_hash_table.__getitem__(key[0])
+        return internal_table.__getitem__(key[1])
 
     def __setitem__(self, key: tuple[K1, K2], data: V) -> None:
         """
