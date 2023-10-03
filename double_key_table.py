@@ -30,8 +30,7 @@ class DoubleKeyTable(Generic[K1, K2, V]):
 
     def __init__(self, sizes:list|None=None, internal_sizes:list|None=None) -> None:
         if sizes is None:
-            self.top_level_hash_table = LinearProbeTable(TABLE_SIZES)
-
+            self.top_level_hash_table = LinearProbeTable(self.TABLE_SIZES)
         else:
             self.top_level_hash_table = LinearProbeTable(sizes)
             
@@ -100,10 +99,13 @@ class DoubleKeyTable(Generic[K1, K2, V]):
                     continue
                 else:
                     yield self.top_level_hash_table.array[i][0]
-
-
         else:
-            pass
+            internal_table = self.top_level_hash_table.__getitem__(key)
+            for i in range(internal_table.table_size):
+                if internal_table.array[i] is None:
+                    continue
+                else:
+                    yield internal_table.array[i][0]
 
     def keys(self, key:K1|None=None) -> list[K1|K2]:
         """
@@ -132,6 +134,13 @@ class DoubleKeyTable(Generic[K1, K2, V]):
                 else:
                     yield self.top_level_hash_table.array[i][1]
         else:
+            internal_table = self.top_level_hash_table.__getitem__(key)
+            for i in range(internal_table.table_size):
+                if internal_table.array[i] is None:
+                    continue
+                else:
+                    yield internal_table.array[i][1]
+
 
     def values(self, key:K1|None=None) -> list[V]:
         """
