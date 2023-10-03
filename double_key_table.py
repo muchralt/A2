@@ -29,13 +29,16 @@ class DoubleKeyTable(Generic[K1, K2, V]):
     HASH_BASE = 31
 
     def __init__(self, sizes:list|None=None, internal_sizes:list|None=None) -> None:
-        if sizes is not None:
-            self.TABLE_SIZES = sizes
-        self.top_level_hash_table = LinearProbeTable(self.TABLE_SIZES)
+        if sizes is None:
+            self.top_level_hash_table = LinearProbeTable(TABLE_SIZES)
+
+        else:
+            self.top_level_hash_table = LinearProbeTable(sizes)
+            
         
         if internal_sizes is not None:
             self.TABLE_SIZES = internal_sizes
-        self.TABLE_SIZES = DoubleKeyTable.TABLE_SIZES
+        
 
     def hash1(self, key: K1) -> int:
         """
@@ -72,56 +75,17 @@ class DoubleKeyTable(Generic[K1, K2, V]):
         :raises KeyError: When the key pair is not in the table, but is_insert is False.
         :raises FullError: When a table is full and cannot be inserted.
         """
-        position1 = self.hash1(key1)
+        position1 = self.top_level_hash_table._linear_probe(key1, is_insert)
+        if is_insert:
+            internal_table = LinearProbeTable(self.TABLE_SIZES)
+            internal_table.hash = lambda k: self.hash2(k, internal_table)
+            self.top_level_hash_table.array[position1] = (key1, internal_table)
 
-        probe1 = False
-        probe2 = False
-
-        for _ in range(self.top_level_hash_table.table_size):
-            if self.top_level_hash_table.array[position1] is None:
-                # Empty spot. Am I upserting or retrieving?
-                if is_insert is True and self.top_level_hash_table.__contains__(key1) is False:
-                    internal_table = LinearProbeTable(self.TABLE_SIZES)
-                    self.top_level_hash_table.array[position1] = (key1, internal_table)
-                    probe1 = True
-                    break
-                else:
-                    raise KeyError(key1)
-            elif self.top_level_hash_table.array[position1][0] == key1:
-                probe1 = True
-                break
-            else:
-                # Taken by something else. Time to linear probe.
-                position1 = (position1 + 1) % self.top_level_hash_table.table_size
-
-        if is_insert is True and probe1 is False:
-            raise FullError("Table is full!")
-        elif probe1 is False:
-            raise KeyError(key1)
-        
-        position2 = self.hash2(key2, internal_table)
-
-        for _ in range(internal_table.table_size):
-            if internal_table.array[position2] is None:
-                # Empty spot. Am I upserting or retrieving?
-                if is_insert:
-                    probe2 = True
-                    break
-                else:
-                    raise KeyError(key2)
-            elif internal_table.array[position2][0] == key2:
-                probe2 = True
-                break
-            else:
-                # Taken by something else. Time to linear probe.
-                position2 = (position2 + 1) % internal_table.table_size
-
-        if is_insert is True and probe2 is False:
-            raise FullError("Table is full!")
-        elif probe2 is False:
-            raise KeyError(key2)
-        
+        position2 = internal_table._linear_probe(key2, is_insert)
         return (position1, position2)
+    
+
+     
 
     def iter_keys(self, key:K1|None=None) -> Iterator[K1|K2]:
         """
@@ -131,7 +95,13 @@ class DoubleKeyTable(Generic[K1, K2, V]):
             Returns an iterator of all keys in the bottom-hash-table for k.
         """
         if key is None:
-            DoubleKeyTable.keys(self, key)
+            for i in range(self.top_level_hash_table.table_size):
+                if self.top_level_hash_table.array[i] is None:
+                    continue
+                else:
+                    yield self.top_level_hash_table.array[i][0]
+
+
         else:
             pass
 
@@ -140,21 +110,13 @@ class DoubleKeyTable(Generic[K1, K2, V]):
         key = None: returns all top-level keys in the table.
         key = x: returns all bottom-level keys for top-level key x.
         """
-        top_level_keys = []
-        internal_keys = []
         if key is None:
-            for i in range(self.top_level_hash_table.table_size):
-                if self.top_level_hash_table.array[i] is not None:
-                    top_level_keys.append(self.top_level_hash_table.array[i][0])
-            return top_level_keys
+            return self.top_level_hash_table.keys()
 
         else:
-            position = self.hash1(key)
-            internal_table = self.top_level_hash_table.array[position][1]
-            for i in range(internal_table.table_size):
-                if internal_table.array[i] is not None:
-                    internal_keys.append(internal_table.array[i][0])
-            return internal_keys
+            internal_table = self.top_level_hash_table.__getitem__(key)
+            internal_table.hash = lambda k: self.hash2(k, internal_table)
+            return internal_table.keys()
 
     def iter_values(self, key:K1|None=None) -> Iterator[V]:
         """
@@ -163,28 +125,26 @@ class DoubleKeyTable(Generic[K1, K2, V]):
         key = k:
             Returns an iterator of all values in the bottom-hash-table for k.
         """
-        raise NotImplementedError()
+        if key is None:
+            for i in range(self.top_level_hash_table.table_size):
+                if self.top_level_hash_table.array[i] is None:
+                    continue
+                else:
+                    yield self.top_level_hash_table.array[i][1]
+        else:
 
     def values(self, key:K1|None=None) -> list[V]:
         """
         key = None: returns all values in the table.
         key = x: returns all values for top-level key x.
         """
-        all_values = []
-        internal_values = []
-
         if key is None:
-            for i in range(self.top_level_hash_table.table_size):
-                if self.top_level_hash_table.array[i] is not None:
-                    all_values.append(self.top_level_hash_table.array[i][1])
-            return all_values
+            return self.top_level_hash_table.values()
+
         else:
-            position = self.hash1(key)
-            internal_table = self.top_level_hash_table.array[position][1]
-            for i in range(internal_table.table_size):
-                if internal_table.array[i] is not None:
-                    internal_values.append(internal_table.array[i][1])
-            return internal_values
+            internal_table = self.top_level_hash_table.__getitem__(key)
+            internal_table.hash = lambda k: self.hash2(k, internal_table)
+            return internal_table.values()
         
     def __contains__(self, key: tuple[K1, K2]) -> bool:
         """

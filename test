@@ -9,8 +9,8 @@ table1.__setitem__("string", table2)
 table2.__setitem__("string", "uchka")
 
 table3 = DoubleKeyTable([8], [4])
-x = table3._linear_probe("s", "a", True)
 
-print(x)
+er = []
 
-
+check = "__iter__" in dir(er)
+print(check)
