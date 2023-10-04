@@ -1,19 +1,30 @@
 from data_structures.hash_table import LinearProbeTable
 from double_key_table import DoubleKeyTable
 
-def itr(count):
-    lst = [
-        [1, 2, 3], 
-        [4, 5, 6], 
-        [7, 8, 9]
-    ]
-    for i in range(count):
-        obj = lst[i]
-        for j in obj:
-            yield j
-            
+table1 = LinearProbeTable([12])
+table2 = LinearProbeTable([5])
+
+table1.__setitem__("May", table2)
+
+table2.__setitem__("Jim", "string")
+
+table3 = DoubleKeyTable(sizes=[12], internal_sizes=[5])
+
+table3.top_level_hash_table = table1
 
 
-for i in itr(1):
-    print(i)
-    
+print(table3._linear_probe("May", "Jim", False))
+
+print(table2._linear_probe("Jim", True))
+
+print(table3["May", "Jim"])
+
+
+value = 0
+a = 31415
+key = "Jim"
+for char in key:
+    value = (ord(char) + a * value) % table2.table_size
+    a = a * 31 % (table2.table_size - 1)
+
+print(value)

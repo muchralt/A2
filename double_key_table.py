@@ -75,11 +75,20 @@ class DoubleKeyTable(Generic[K1, K2, V]):
         :raises KeyError: When the key pair is not in the table, but is_insert is False.
         :raises FullError: When a table is full and cannot be inserted.
         """
+
+        # position1 = self.top_level_hash_table.hash(key1)
+        # for i in range(self.top_level_hash_table.table_size):
+        #     if is_insert is True:
+        #         #check if there is an internal table at this position 
+
+
         position1 = self.top_level_hash_table._linear_probe(key1, is_insert)
-        if is_insert is True:
+        if is_insert is True and self.top_level_hash_table.array[position1] is None:
             internal_table = LinearProbeTable(self.TABLE_SIZES)
             internal_table.hash = lambda k: self.hash2(k, internal_table)
             self.top_level_hash_table.array[position1] = (key1, internal_table)
+            self.top_level_hash_table.count += 1
+
         internal_table = self.top_level_hash_table.array[position1][1]
 
         position2 = internal_table._linear_probe(key2, is_insert)
@@ -131,10 +140,11 @@ class DoubleKeyTable(Generic[K1, K2, V]):
         """
         if key is None:
             for i in range(self.top_level_hash_table.table_size):
-                if self.top_level_hash_table.array[i] is None:
+                internal_table = self.top_level_hash_table.array[i] 
+                if internal_table is None:
                     continue
                 else:
-                    yield self.top_level_hash_table.array[i][1]
+                    yield
         else:
             internal_table = self.top_level_hash_table.__getitem__(key)
             for i in range(internal_table.table_size):
@@ -150,7 +160,7 @@ class DoubleKeyTable(Generic[K1, K2, V]):
         key = x: returns all values for top-level key x.
         """
         if key is None:
-            return self.top_level_hash_table.values()
+            return [value for internal_table in internal_table_list for value in internal_table.values()]        
 
         else:
             internal_table = self.top_level_hash_table.__getitem__(key)
@@ -195,10 +205,13 @@ class DoubleKeyTable(Generic[K1, K2, V]):
         if len(self.top_level_hash_table) > self.top_level_hash_table.table_size / 2:
             self.top_level_hash_table._rehash()
 
-        internal_table.array[position[1]] = (key[1], data)
+        if internal_table.array[position[1]] is None:
+            internal_table.count += 1
 
         if len(internal_table) > internal_table.table_size / 2:
             internal_table._rehash()
+
+        internal_table.array[position[1]] = (key[1], data)
 
     def __delitem__(self, key: tuple[K1, K2]) -> None:
         """
