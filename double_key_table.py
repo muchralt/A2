@@ -160,6 +160,7 @@ class DoubleKeyTable(Generic[K1, K2, V]):
         key = x: returns all values for top-level key x.
         """
         if key is None:
+            internal_table_list = self.top_level_hash_table.values()
             return [value for internal_table in internal_table_list for value in internal_table.values()]        
 
         else:
