@@ -140,11 +140,13 @@ class DoubleKeyTable(Generic[K1, K2, V]):
         """
         if key is None:
             for i in range(self.top_level_hash_table.table_size):
-                internal_table = self.top_level_hash_table.array[i] 
-                if internal_table is None:
+                cell = self.top_level_hash_table.array[i]
+                if cell is None:
                     continue
                 else:
-                    yield
+                    internal_table = cell[1]
+                    for value in internal_table.values():
+                        yield value
         else:
             internal_table = self.top_level_hash_table.__getitem__(key)
             for i in range(internal_table.table_size):
