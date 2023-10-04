@@ -22,9 +22,13 @@ print(table3["May", "Jim"])
 
 value = 0
 a = 31415
-key = "Jim"
-for char in key:
-    value = (ord(char) + a * value) % table2.table_size
-    a = a * 31 % (table2.table_size - 1)
+def hash1(k):
+    return ord(k[0]) % 12
+def hash2(k):
+    return ord(k[-1]) % 5
 
-print(value)
+print(hash1("Tim"))
+print(hash2("Jen"))
+print(hash2("Kat"))
+print(hash1("Amy"))
+print(hash2("Ben"))

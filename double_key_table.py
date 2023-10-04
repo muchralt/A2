@@ -222,8 +222,12 @@ class DoubleKeyTable(Generic[K1, K2, V]):
 
         :raises KeyError: when the key doesn't exist.
         """
-        raise NotImplementedError()
-
+        position = self._linear_probe(key[0], key[1], False)
+        internal_table = self.top_level_hash_table.array[position[0]][1]
+        internal_table.__delitem__(key[1])
+        if internal_table.is_empty():
+            self.top_level_hash_table.__delitem__(key[0])
+            
     def _rehash(self) -> None:
         """
         Need to resize table and reinsert all values
