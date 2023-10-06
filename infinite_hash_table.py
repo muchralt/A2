@@ -59,6 +59,7 @@ class InfiniteHashTable:
         if isinstance(self.array[position][1], InfiniteHashTable):
             internal_table = self.array[position][1]
             res = internal_table.del_helper(key)
+            self.count -= 1
             if internal_table.count == 1 and internal_table.bot_level:
                 internal_table = None
                 new_position = self.hash(key)
