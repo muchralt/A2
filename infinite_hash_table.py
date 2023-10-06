@@ -6,6 +6,7 @@ class InfiniteHashTable:
     def __init__(self, level = None):
         self.array:ArrayR[tuple[K, V]] = ArrayR(self.TABLE_SIZE)
         self.count = 0
+        self.bot_level = True
         #Initialise None argument for level: If level = None then self.level = 0
         if level is None:
             self.level = 0
@@ -23,24 +24,25 @@ class InfiniteHashTable:
         if isinstance(self.array[position][1], InfiniteHashTable):
             internal_table = self.array[position][1]
             internal_table.__getitem__(key)
-        elif self.array[position] is None:
+
+        elif self.array[position][0] != key:
             raise KeyError
         else:
             return self.array[position][1]
 
     def __setitem__(self, key, value):
         position = self.hash(key)
+        self.count += 1
         if self.array[position] is None:
             self.array[position] = (key, value)
-            self.count += 1
 
         elif isinstance(self.array[position][1], InfiniteHashTable):
             internal_table = self.array[position][1]
             internal_table.__setitem__(key, value)
 
         else:
+            self.bot_level = False
             collision_cell = self.array[position]
-
             internal_table = InfiniteHashTable(self.level+1)
             new_collision_pos = internal_table.hash(collision_cell[0])
             internal_table.array[new_collision_pos] = collision_cell
@@ -57,14 +59,15 @@ class InfiniteHashTable:
         if isinstance(self.array[position][1], InfiniteHashTable):
             internal_table = self.array[position][1]
             res = internal_table.del_helper(key)
-            if internal_table.count == 1 and res[1]:
+            if internal_table.count == 1 and internal_table.bot_level:
                 internal_table = None
                 new_position = self.hash(key)
-                self.array[new_position] = res[0]
+                self.array[new_position] = res
+                self.bot_level = True
                 return res
-            return [res[0], False]
+            return res
 
-        elif self.array[position] is None:
+        elif self.array[position][0] != key:
             raise KeyError
         else:
             self.array[position] = None
@@ -72,14 +75,25 @@ class InfiniteHashTable:
         if self.count == 1:
             for i in range(self.TABLE_SIZE):
                 if self.array[i] is not None:
-                    return [self.array[i], True]
+                    return self.array[i]
         
     def get_location(self, key):
         # location = [self.hash(key)]
         # if self.level < len(key) and key[self.level] in self.table:
         #     location += self.table[key[self.level]].get_location(key)
         # return location
-        pass
+        location = []
+        position = self.hash(key)
+        location.append(position)
+
+        if isinstance(self.array[position][1], InfiniteHashTable):
+            internal_table = self.array[position][1]
+            return location + internal_table.get_location(key)
+            
+        elif self.array[position][0] != key:
+            raise KeyError
+        else:
+            return location
 
     def sort_keys(self):
         # keys = []
@@ -91,3 +105,7 @@ class InfiniteHashTable:
         # keys.sort()
         # return keys
         pass
+    
+    
+    def __len__(self):
+        return self.count
