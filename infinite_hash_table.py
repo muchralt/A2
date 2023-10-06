@@ -79,10 +79,6 @@ class InfiniteHashTable:
                     return self.array[i]
         
     def get_location(self, key):
-        # location = [self.hash(key)]
-        # if self.level < len(key) and key[self.level] in self.table:
-        #     location += self.table[key[self.level]].get_location(key)
-        # return location
         location = []
         position = self.hash(key)
         location.append(position)
