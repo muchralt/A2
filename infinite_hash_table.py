@@ -1,4 +1,5 @@
 from data_structures.referential_array import ArrayR
+from algorithms.mergesort import mergesort
 
 class InfiniteHashTable:
     TABLE_SIZE = 27
@@ -93,16 +94,24 @@ class InfiniteHashTable:
             return location
 
     def sort_keys(self):
-        # keys = []
-        # for k, v in self.table.items():
-        #     if isinstance(v, InfiniteHashTable):
-        #         keys.extend([k + subkey for subkey in v.sort_keys()])
-        #     else:
-        #         keys.append(k)
-        # keys.sort()
-        # return keys
-        pass
+        return mergesort(self.keys())
+        
     
+
+    def keys(self):
+        res = []
+        for i in range(self.TABLE_SIZE):
+            if self.array[i] is None:
+                continue
+            elif isinstance(self.array[i][1], InfiniteHashTable):
+                internal_table = self.array[i][1]
+                # res + internal_table.keys()
+                internal_keys = internal_table.keys()
+                res = res + internal_keys
+            else:
+                res.append(self.array[i][0])
+        
+        return res
     
     def __len__(self):
         return self.count
