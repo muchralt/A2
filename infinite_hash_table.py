@@ -30,11 +30,11 @@ class InfiniteHashTable:
         # if self.level == len(key):
         #     self.table[key] = value
         # elif self.level < len(key):
-        #     table_index = self.hash(key)
-        #     if table_index not in self.table:
-        #         self.table[table_index] = InfiniteHashTable()
-        #         self.table[table_index].level = self.level + 1
-        #     self.table[table_index].__setitem__(key, value)
+            # table_index = self.hash(key)
+            # if table_index not in self.table:
+            #     self.table[table_index] = InfiniteHashTable()
+            #     self.table[table_index].level = self.level + 1
+            # self.table[table_index].__setitem__(key, value)
 
         position = self.hash(key)
         if self.array[position] is None:
@@ -46,6 +46,7 @@ class InfiniteHashTable:
             new_collision_pos = internal_table.hash(collision_cell[0])
             internal_table.array[new_collision_pos] = collision_cell
             internal_table.__setitem__(key, value)
+            self.array[position] = (key[:self.level+1], value)
 
     def __delitem__(self, key):
         if self.level == len(key):
