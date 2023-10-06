@@ -1,26 +1,10 @@
-from __future__ import annotations
-from typing import Generic, TypeVar
-
-from data_structures.referential_array import ArrayR
-
-K = TypeVar("K")
-V = TypeVar("V")
-
-class InfiniteHashTable(Generic[K, V]):
-    """
-    Infinite Hash Table.
-
-    Type Arguments:
-        - K:    Key Type. In most cases should be string.
-                Otherwise `hash` should be overwritten.
-        - V:    Value Type.
-
-    Unless stated otherwise, all methods have O(1) complexity.
-    """
-
+class InfiniteHashTable:
     TABLE_SIZE = 27
 
-    def __init__(self, level: int) -> None:
+    def __init__(self, level):
+        # self.level = 0
+        # self.table = {}
+
         self.array:ArrayR[tuple[K, V]] = ArrayR(self.TABLE_SIZES)
         self.count = 0
         #Initialise None argument for level: If level = None then self.level = 0
@@ -29,23 +13,29 @@ class InfiniteHashTable(Generic[K, V]):
         else:
             self.level = level
 
-    def hash(self, key: K) -> int:
+    def hash(self, key):
         if self.level < len(key):
-            return ord(key[self.level]) % (self.TABLE_SIZE-1)
-        return self.TABLE_SIZE-1
+            return ord(key[self.level]) % (self.TABLE_SIZE - 1)
+        return self.TABLE_SIZE - 1
 
-    def __getitem__(self, key: K) -> V:
-        """
-        Get the value at a certain key
+    def __getitem__(self, key):
+        if self.level == len(key):
+            return self.table.get(key, None)
+        elif self.level < len(key) and key[self.level] in self.table:
+            return self.table[key[self.level]].__getitem__(key)
+        else:
+            return None
 
-        :raises KeyError: when the key doesn't exist.
-        """
-        raise NotImplementedError()
+    def __setitem__(self, key, value):
+        # if self.level == len(key):
+        #     self.table[key] = value
+        # elif self.level < len(key):
+        #     table_index = self.hash(key)
+        #     if table_index not in self.table:
+        #         self.table[table_index] = InfiniteHashTable()
+        #         self.table[table_index].level = self.level + 1
+        #     self.table[table_index].__setitem__(key, value)
 
-    def __setitem__(self, key: K, value: V) -> None:
-        """
-        Set an (key, value) pair in our hash table.
-        """
         position = self.hash(key)
         if self.array[position] is None:
             self.array[position] = (key, value)
@@ -56,50 +46,27 @@ class InfiniteHashTable(Generic[K, V]):
             new_collision_pos = internal_table.hash(collision_cell[0])
             internal_table.array[new_collision_pos] = collision_cell
             internal_table.__setitem__(key, value)
-            
 
-    def __delitem__(self, key: K) -> None:
-        """
-        Deletes a (key, value) pair in our hash table.
+    def __delitem__(self, key):
+        if self.level == len(key):
+            del self.table[key]
+        elif self.level < len(key) and key[self.level] in self.table:
+            self.table[key[self.level]].__delitem__(key)
+            if len(self.table[key[self.level]].table) == 0:
+                del self.table[key[self.level]]
 
-        :raises KeyError: when the key doesn't exist.
-        """
-        raise NotImplementedError()
+    def get_location(self, key):
+        location = [self.hash(key)]
+        if self.level < len(key) and key[self.level] in self.table:
+            location += self.table[key[self.level]].get_location(key)
+        return location
 
-    def __len__(self) -> int:
-        raise NotImplementedError()
-
-    def __str__(self) -> str:
-        """
-        String representation.
-
-        Not required but may be a good testing tool.
-        """
-        raise NotImplementedError()
-
-    def get_location(self, key) -> list[int]:
-        """
-        Get the sequence of positions required to access this key.
-
-        :raises KeyError: when the key doesn't exist.
-        """
-        raise NotImplementedError()
-
-    def __contains__(self, key: K) -> bool:
-        """
-        Checks to see if the given key is in the Hash Table
-
-        :complexity: See linear probe.
-        """
-        try:
-            _ = self[key]
-        except KeyError:
-            return False
-        else:
-            return True
-
-    def sort_keys(self, current=None) -> list[str]:
-        """
-        Returns all keys currently in the table in lexicographically sorted order.
-        """
-        raise NotImplementedError()
+    def sort_keys(self):
+        keys = []
+        for k, v in self.table.items():
+            if isinstance(v, InfiniteHashTable):
+                keys.extend([k + subkey for subkey in v.sort_keys()])
+            else:
+                keys.append(k)
+        keys.sort()
+        return keys
