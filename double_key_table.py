@@ -74,6 +74,10 @@ class DoubleKeyTable(Generic[K1, K2, V]):
 
         :raises KeyError: When the key pair is not in the table, but is_insert is False.
         :raises FullError: When a table is full and cannot be inserted.
+
+        :complexity best: O(hash(key1) + hash(key2)) first position is empty
+        :complexity worst: O(hash(key1 + hash(key2)) + N*comp(K1) + N*comp(K2)) when we've searched the entire table
+        where N is the tablesize
         """
         position1 = self.top_level_hash_table._linear_probe(key1, is_insert)
         if is_insert is True and self.top_level_hash_table.array[position1] is None:
@@ -93,6 +97,9 @@ class DoubleKeyTable(Generic[K1, K2, V]):
             Returns an iterator of all top-level keys in hash table
         key = k:
             Returns an iterator of all keys in the bottom-hash-table for k.
+
+        complexity best case: O(M), where M is the number of top-level keys.
+        complexity worst case: O(N + __getitem__) where N is internal table size.
         """
         if key is None:
             for i in range(self.top_level_hash_table.table_size):
@@ -112,6 +119,9 @@ class DoubleKeyTable(Generic[K1, K2, V]):
         """
         key = None: returns all top-level keys in the table.
         key = x: returns all bottom-level keys for top-level key x.
+
+        :complexity best case: O(N) where N is self.top_level_hash_table.table_sizes.
+        :complexity worst case: O(hash(key) + __getitem__ + M) where M is self.internal_sizes.
         """
         if key is None:
             return self.top_level_hash_table.keys()
@@ -127,6 +137,10 @@ class DoubleKeyTable(Generic[K1, K2, V]):
             Returns an iterator of all values in hash table
         key = k:
             Returns an iterator of all values in the bottom-hash-table for k.
+
+        complexity best case: O(M * N), where M is the number of top-level values
+                                and N is the number of internal-level values.
+        complexity worst case: O(N + __getitem__) where N is internal table size.
         """
         if key is None:
             for i in range(self.top_level_hash_table.table_size):
@@ -149,6 +163,10 @@ class DoubleKeyTable(Generic[K1, K2, V]):
         """
         key = None: returns all values in the table.
         key = x: returns all values for top-level key x.
+
+        complexity best case: O(N), where N is the number of top-level keys.
+        complexity worst case: O(N + M), where N is the number of top-level keys, 
+                                and M is the total number of values in all internal tables.
         """
         if key is None:
             internal_table_list = self.top_level_hash_table.values()
@@ -177,6 +195,8 @@ class DoubleKeyTable(Generic[K1, K2, V]):
         Get the value at a certain key
 
         :raises KeyError: when the key doesn't exist.
+
+        complexity best/worst case: O(_linear_probe)
         """
         position = self._linear_probe(key[0], key[1], False)
         internal_table = self.top_level_hash_table.array[position[0]][1]
@@ -185,6 +205,10 @@ class DoubleKeyTable(Generic[K1, K2, V]):
     def __setitem__(self, key: tuple[K1, K2], data: V) -> None:
         """
         Set an (key, value) pair in our hash table.
+
+        complexity best case: O(1), where its the first item.
+        complexity worst case: O(N*hash(K1) + N*hash(K2) + N^2*comp(K1) N^2*comp(K2)), where it needs to rehash the top-level 
+                                and internal tables and lots of probing. N is the table size.
         """
         position = self._linear_probe(key[0], key[1], True)
 
@@ -209,6 +233,9 @@ class DoubleKeyTable(Generic[K1, K2, V]):
         Deletes a (key, value) pair in our hash table.
 
         :raises KeyError: when the key doesn't exist.
+
+        complexity best case: O(_linear_probe), where we don't have to delete the internal table.
+        complexity worst case: O(_linear_probe*2), where we do have to delete the internal table.
         """
         position = self._linear_probe(key[0], key[1], False)
         internal_table = self.top_level_hash_table.array[position[0]][1]

@@ -96,7 +96,13 @@ class Trail:
         return Trail(TrailSplit(Trail(), Trail(), self))
 
     def follow_path(self, personality: WalkerPersonality) -> None:
-        """Follow a path and add mountains according to a personality."""
+        """Follow a path and add mountains according to a personality.
+
+        :complexity:
+        Best Case Complexity: O(1), where the first desicion is to stop.
+        Worst Case Complexity: O(n), where n is how deep/long the trail is, which is
+        dependent on how many mountains the traveler is going to take.
+        """
         from personality import PersonalityDecision
 
         stack_trailsplit = LinkedStack()
