@@ -29,6 +29,7 @@ class DoubleKeyTable(Generic[K1, K2, V]):
     HASH_BASE = 31
 
     def __init__(self, sizes:list|None=None, internal_sizes:list|None=None) -> None:
+
         if sizes is None:
             self.top_level_hash_table = LinearProbeTable(self.TABLE_SIZES)
         else:
@@ -38,7 +39,6 @@ class DoubleKeyTable(Generic[K1, K2, V]):
         
         if internal_sizes is not None:
             self.TABLE_SIZES = internal_sizes
-        
 
     def hash1(self, key: K1) -> int:
         """
@@ -75,13 +75,6 @@ class DoubleKeyTable(Generic[K1, K2, V]):
         :raises KeyError: When the key pair is not in the table, but is_insert is False.
         :raises FullError: When a table is full and cannot be inserted.
         """
-
-        # position1 = self.top_level_hash_table.hash(key1)
-        # for i in range(self.top_level_hash_table.table_size):
-        #     if is_insert is True:
-        #         #check if there is an internal table at this position 
-
-
         position1 = self.top_level_hash_table._linear_probe(key1, is_insert)
         if is_insert is True and self.top_level_hash_table.array[position1] is None:
             internal_table = LinearProbeTable(self.TABLE_SIZES)
@@ -93,9 +86,6 @@ class DoubleKeyTable(Generic[K1, K2, V]):
 
         position2 = internal_table._linear_probe(key2, is_insert)
         return (position1, position2)
-    
-
-     
 
     def iter_keys(self, key:K1|None=None) -> Iterator[K1|K2]:
         """
@@ -155,7 +145,6 @@ class DoubleKeyTable(Generic[K1, K2, V]):
                 else:
                     yield internal_table.array[i][1]
 
-
     def values(self, key:K1|None=None) -> list[V]:
         """
         key = None: returns all values in the table.
@@ -197,7 +186,6 @@ class DoubleKeyTable(Generic[K1, K2, V]):
         """
         Set an (key, value) pair in our hash table.
         """
-
         position = self._linear_probe(key[0], key[1], True)
 
         if self.top_level_hash_table.array[position[0]] is None:

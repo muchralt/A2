@@ -95,8 +95,6 @@ class InfiniteHashTable:
 
     def sort_keys(self):
         return mergesort(self.keys())
-        
-    
 
     def keys(self):
         res = []
@@ -110,7 +108,6 @@ class InfiniteHashTable:
                 res = res + internal_keys
             else:
                 res.append(self.array[i][0])
-        
         return res
     
     def __len__(self):
