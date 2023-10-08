@@ -1,34 +1,21 @@
 from data_structures.hash_table import LinearProbeTable
 from double_key_table import DoubleKeyTable
+from mountain import Mountain
+from mountain_organiser import MountainOrganiser
 
-table1 = LinearProbeTable([12])
-table2 = LinearProbeTable([5])
+m1 = Mountain("m1", 2, 2)
+m2 = Mountain("m2", 9, 2)
+m3 = Mountain("m3", 6, 3)
+m4 = Mountain("m4", 1, 3)
+m5 = Mountain("m5", 6, 4)
+m6 = Mountain("m6", 3, 7)
+m7 = Mountain("m7", 7, 7)
+m8 = Mountain("m8", 8, 7)
+m9 = Mountain("m9", 6, 7)
+m10 = Mountain("m10", 4, 8)
 
-table1.__setitem__("May", table2)
+ml = [m1, m2, m3, m4, m5]
+mo = MountainOrganiser()
+mo.add_mountains(ml)
+mo.mountains_table["berry"] = 1123
 
-table2.__setitem__("Jim", "string")
-
-table3 = DoubleKeyTable(sizes=[12], internal_sizes=[5])
-
-table3.top_level_hash_table = table1
-
-
-print(table3._linear_probe("May", "Jim", False))
-
-print(table2._linear_probe("Jim", True))
-
-print(table3["May", "Jim"])
-
-
-value = 0
-a = 31415
-def hash1(k):
-    return ord(k[0]) % 12
-def hash2(k):
-    return ord(k[-1]) % 5
-
-print(hash1("Tim"))
-print(hash2("Jen"))
-print(hash2("Kat"))
-print(hash1("Amy"))
-print(hash2("Ben"))

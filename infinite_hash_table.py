@@ -33,9 +33,16 @@ class InfiniteHashTable:
 
     def __setitem__(self, key, value):
         position = self.hash(key)
+        
         self.count += 1
-        if self.array[position] is None:
+
+        if self.array[position] is None: 
             self.array[position] = (key, value)
+
+        elif self.array[position][0] == key:
+            self.count -= 1
+            self.array[position] = (key, value)
+            
 
         elif isinstance(self.array[position][1], InfiniteHashTable):
             internal_table = self.array[position][1]
