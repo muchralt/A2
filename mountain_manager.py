@@ -1,5 +1,6 @@
 from __future__ import annotations
 from mountain import Mountain
+import copy
 
 class MountainManager:
 
@@ -21,6 +22,7 @@ class MountainManager:
 
     def group_by_difficulty(self) -> list[list[Mountain]]:
         new_list = []
+        mountains_copy = copy.deepcopy(self.mountains)
         mountain_iter = iter(self.mountains)
         mountain_iter2 = iter(self.mountains)
         for mountain in mountain_iter:

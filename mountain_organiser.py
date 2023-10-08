@@ -15,6 +15,14 @@ class MountainOrganiser:
         self.mountains_table = LinearProbeTable()
 
     def cur_position(self, mountain: Mountain) -> int:
+        """
+        Finds the rank of the provided mountain given all mountains included so far.
+
+        :raises KeyError: when the mountain doesn't exist.
+
+        complexity best case: O(hash(key)), where we don't have to delete the internal tables.
+        complexity worst case: O(hash(key) * N), where N is the number of recursion.
+        """
         if mountain not in self.mountains_list:
             raise KeyError
         else:

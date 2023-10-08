@@ -28,8 +28,8 @@ class InfiniteHashTable:
 
         :raises KeyError: when the key doesn't exist.
 
-        complexity best case: O(hash(key)), where we straight find the value.
-        complexity worst case: O(hash(key) * N), where N is how many times we have to recurse
+        complexity best case: O(hash(key)), where we  find the value straight away.
+        complexity worst case: O(hash(key) * N), where N is how many times we have to recurse.
         """
         position = self.hash(key)
 
@@ -47,7 +47,7 @@ class InfiniteHashTable:
         Set an (key, value) pair in our hash table.
 
         complexity best case: O(hash(key)), where there are no collisions.
-        complexity worst case: O(hash(key) )
+        complexity worst case: O(hash(key) * N), where N is how many times we have to recurse.
         """
         position = self.hash(key)
         
@@ -76,6 +76,14 @@ class InfiniteHashTable:
             internal_table.__setitem__(key, value)
 
     def __delitem__(self, key):
+        """
+        Deletes a (key, value) pair in our hash table.
+
+        :raises KeyError: when the key doesn't exist.
+
+        complexity best case: O(hash(key)), where we don't have to delete the internal tables.
+        complexity worst case: O(hash(key) * N), where N is the number of recursion.
+        """
         self.del_helper(key)
                 
     def del_helper(self, key):
@@ -104,6 +112,14 @@ class InfiniteHashTable:
                     return self.array[i]
         
     def get_location(self, key):
+        """
+        Returns a list containing the indices required to retrieve a key.
+
+        :raises KeyError: when the key doesn't exist.
+
+        complexity best case: O(hash(key)), where the item is in the top-most table.
+        complexity worst case: O(hash(key) * N), where N is the number of recursion.
+        """
         location = []
         position = self.hash(key)
         location.append(position)
@@ -118,6 +134,12 @@ class InfiniteHashTable:
             return location
 
     def sort_keys(self):
+        """
+        Sort a list using the mergesort operation.
+        :complexity: Best/Worst Case O(N∗A∗L), where N is the number of words inserted, 
+                    L is the length of the longest word and
+                    A is the size of the alphabet (26 in our case).
+        """
         return mergesort(self.keys())
 
     def keys(self):
