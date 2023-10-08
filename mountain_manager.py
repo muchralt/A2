@@ -20,6 +20,12 @@ class MountainManager:
         return [mountain for mountain in self.mountains if mountain.difficulty_level == diff]
 
     def group_by_difficulty(self) -> list[list[Mountain]]:
-        test = iter(self.mountains)
+        new_list = []
+        mountain_iter = iter(self.mountains)
+        mountain_iter2 = iter(self.mountains)
+        for mountain in mountain_iter:
+            new_list.append([item for item in mountain_iter2 if item.difficulty_level == mountain.difficulty_level])
+        return new_list
+
         
             

@@ -126,7 +126,32 @@ class Trail:
 
     def collect_all_mountains(self) -> list[Mountain]:
         """Returns a list of all mountains on the trail."""
+        stack_trailsplit = LinkedStack()
+       
+        mountain_list = []
+        if self.store is None:
+            return mountain_list
+        elif isinstance(self.store, TrailSeries):
+            mountain_list.append(self.store.mountain)
+            mountain_list = mountain_list + self.store.following.collect_all_mountains()
+        else:
+            top_branch = self.store.top.collect_all_mountains()
+            bot_branch = self.store.bottom.collect_all_mountains()
+            following = self.store.following.collect_all_mountains()
+            mountain_list = mountain_list + top_branch + bot_branch + following
+
+        return mountain_list
+
+        # current_path = self.store
+        # while current_path is not None:
+        #     if isinstance(current_path, TrailSeries):
+        #         mountain_list.append(current_path.mountain)
+        #         current_path = current_path.following.store
+        #     elif isinstance(current_path, TrailSplit):=
+                
         
+
+
 
     def difficulty_maximum_paths(self, max_difficulty: int) -> list[list[Mountain]]: # Input to this should not exceed k > 50, at most 5 branches.
         # 1008/2085 ONLY!
