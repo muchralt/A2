@@ -3,6 +3,9 @@ from mountain import Mountain
 import copy
 
 class MountainManager:
+    """
+    Unless stated otherwise, all methods have O(1) complexity.
+    """
 
     def __init__(self) -> None:
         self.mountains = []
@@ -18,6 +21,11 @@ class MountainManager:
         self.add_mountain(new)
 
     def mountains_with_difficulty(self, diff: int) -> list[Mountain]:
+        """
+        Return a list of all mountains with this difficulty.
+
+        complexity best/worst case: O(N*comp), where N is the total number of mountains included in the list.
+        """
         return [mountain for mountain in self.mountains if mountain.difficulty_level == diff]
 
     def group_by_difficulty(self) -> list[list[Mountain]]:

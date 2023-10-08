@@ -142,17 +142,6 @@ class Trail:
 
         return mountain_list
 
-        # current_path = self.store
-        # while current_path is not None:
-        #     if isinstance(current_path, TrailSeries):
-        #         mountain_list.append(current_path.mountain)
-        #         current_path = current_path.following.store
-        #     elif isinstance(current_path, TrailSplit):=
-                
-        
-
-
-
     def difficulty_maximum_paths(self, max_difficulty: int) -> list[list[Mountain]]: # Input to this should not exceed k > 50, at most 5 branches.
         # 1008/2085 ONLY!
         raise NotImplementedError()

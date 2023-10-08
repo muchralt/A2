@@ -76,8 +76,8 @@ class DoubleKeyTable(Generic[K1, K2, V]):
         :raises FullError: When a table is full and cannot be inserted.
 
         :complexity best: O(hash(key1) + hash(key2)) first position is empty
-        :complexity worst: O(hash(key1 + hash(key2)) + N*comp(K1) + N*comp(K2)) when we've searched the entire table
-        where N is the tablesize
+        :complexity worst: O(hash(key1) + hash(key2) + N*comp(K1) + M*comp(K2)) when we've searched the entire table
+        where N is the tablesize and M is the internal table size.
         """
         position1 = self.top_level_hash_table._linear_probe(key1, is_insert)
         if is_insert is True and self.top_level_hash_table.array[position1] is None:
