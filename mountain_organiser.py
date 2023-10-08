@@ -20,8 +20,8 @@ class MountainOrganiser:
 
         :raises KeyError: when the mountain doesn't exist.
 
-        complexity best case: O(hash(key)), where we don't have to delete the internal tables.
-        complexity worst case: O(hash(key) * N), where N is the number of recursion.
+        complexity best case: O(1), where it is the only mountain or first mountain in the list.
+        complexity worst case: O(log(N)), where N is the total number of mountains included so far.
         """
         if mountain not in self.mountains_list:
             raise KeyError
@@ -29,7 +29,12 @@ class MountainOrganiser:
             return self.mountains_table[mountain.name]
         
     def add_mountains(self, mountains: list[Mountain]) -> None:
-        
+        """
+        Adds a list of mountains to the organiser
+
+        complexity best/worst case: O(Mlog(M)+N), where M is the length of the input list, and
+                                N is the total number of mountains included so far.
+        """
         self.mountains_list = merge(self.mountains_list, mergesort(mountains, key=lambda x:x.difficulty_level), key=lambda x:x.difficulty_level)
 
         for i, mountain in enumerate(self.mountains_list):
