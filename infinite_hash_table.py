@@ -2,6 +2,9 @@ from data_structures.referential_array import ArrayR
 from algorithms.mergesort import mergesort
 
 class InfiniteHashTable:
+    """
+    Unless stated otherwise, all methods have O(1) complexity.
+    """
     TABLE_SIZE = 27
 
     def __init__(self, level = None):
@@ -20,6 +23,14 @@ class InfiniteHashTable:
         return self.TABLE_SIZE - 1
 
     def __getitem__(self, key):
+        """
+        Get the value at a certain key
+
+        :raises KeyError: when the key doesn't exist.
+
+        complexity best case: O(hash(key)), where we straight find the value.
+        complexity worst case: O(hash(key) * N), where N is how many times we have to recurse
+        """
         position = self.hash(key)
 
         if isinstance(self.array[position][1], InfiniteHashTable):
@@ -32,6 +43,12 @@ class InfiniteHashTable:
             return self.array[position][1]
 
     def __setitem__(self, key, value):
+        """
+        Set an (key, value) pair in our hash table.
+
+        complexity best case: O(hash(key)), where there are no collisions.
+        complexity worst case: O(hash(key) )
+        """
         position = self.hash(key)
         
         self.count += 1
