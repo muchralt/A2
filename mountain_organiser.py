@@ -6,6 +6,9 @@ from data_structures.hash_table import LinearProbeTable
 from mountain import Mountain
 
 class MountainOrganiser:
+    """
+    Unless stated otherwise, all methods have O(1) complexity.
+    """
 
     def __init__(self) -> None:
         self.mountains_list = []
